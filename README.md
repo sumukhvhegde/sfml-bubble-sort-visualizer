@@ -18,3 +18,4 @@ This project demonstrates the bubble sort algorithm with an interactive graphica
 ![Screenshot](screenshots/1.png)
 ![Screenshot](screenshots/2.png)
 ![Screenshot](screenshots/3.png)
+![Screenshot](screenshots/4.png)
