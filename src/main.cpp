@@ -28,16 +28,17 @@ int main() {
 	// Define instruction text
 	sf::Text startText(font, "Press SPACE to start sorting.\n\nPress R to reset.", 15);
 	startText.setFillColor(sf::Color::White);
-	
+
 	// Get info text bounds
 	sf::FloatRect textBounds = startText.getLocalBounds();
 
 	// Set info text origin to the center
-	startText.setOrigin({ textBounds.size.x / 2.f, textBounds.size.y / 2.f }); 
+	startText.setOrigin({ textBounds.size.x / 2.f, textBounds.size.y / 2.f });
 	startText.setPosition({ window.getSize().x / 2.f, window.getSize().y / 2.f });
 
 	// Flags
 	bool sortingStarted = false;
+	bool sortingCompleted = false;
 	bool isPaused = false;
 
 	// Define vector
@@ -63,6 +64,7 @@ int main() {
 				if (key->scancode == sf::Keyboard::Scan::Space) {
 					if (!sortingStarted) {
 						sortingStarted = true;
+						sortingCompleted = false;
 						isPaused = false;
 					} else {
 						isPaused = !isPaused;
@@ -71,7 +73,7 @@ int main() {
 
 				if (key->scancode == sf::Keyboard::Scan::R) {
 					sortingStarted = false;
-					i = 0; 
+					i = 0;
 					j = 0;
 
 					// Shuffle array
@@ -96,16 +98,32 @@ int main() {
 			// Draw bars
 			for (int k = 0; k < n; ++k) {
 				sf::RectangleShape bar;
-				bar.setOutlineThickness(-1.f);
-				bar.setOutlineColor(sf::Color::Black);
-				bar.setSize({ barWidth, static_cast<float>(values[k]) });
+		
+				float gap = 1.f;
+				bar.setSize({ barWidth - gap, static_cast<float>(values[k]) });
 				bar.setPosition({ static_cast<float>(k) * barWidth, static_cast<float>(window.getSize().y) - values[k] });
-				bar.setFillColor(sf::Color::White);
+
+				// Highlight bars being compared
+				if (k == j || k == j + 1) {
+					bar.setFillColor(sf::Color::Red);
+				} else {
+					// Map height to color 
+					int colorVal = static_cast<int>(255 * values[k] / window.getSize().y);
+					bar.setFillColor(sf::Color(colorVal, colorVal, 255));
+				}
+
 				window.draw(bar);
 			}
 
 			// If sorting is active, and not paused
-			if (sortingStarted && !isPaused) {
+			if (sortingStarted && !isPaused && !sortingCompleted) {
+				// Show info text
+				sf::Text info(font, "Sorting...Press SPACE to pause");
+				info.setPosition({ 10, 10 });
+				info.setCharacterSize(12);
+
+				window.draw(info);
+
 				// Bubble sort visualization state
 				if (i < n) {
 					if (j < n - i - 1) {
@@ -113,12 +131,46 @@ int main() {
 							std::swap(values[j], values[j + 1]);
 						}
 						j++;
-					}
-					else {
+					} else {
 						j = 0;
 						i++;
 					}
+				} else {
+					sortingCompleted = true;
 				}
+			}
+			
+			// If paused, draw overlay and paused text
+			if (isPaused) {
+				// Overlay
+				sf::RectangleShape overlay(sf::Vector2f(window.getSize()));
+
+				// Semi-transparent 
+				overlay.setFillColor(sf::Color(0, 0, 0, 127));
+				window.draw(overlay);
+
+				// Pause text
+				sf::Text pauseText(font, "PAUSED", 32);
+				sf::FloatRect pauseTextBounds = pauseText.getLocalBounds();
+
+				pauseText.setOrigin({ pauseTextBounds.size.x / 2.f, pauseTextBounds.size.y / 2.f });
+				pauseText.setPosition({ window.getSize().x / 2.f, window.getSize().y / 2.f });
+
+				window.draw(pauseText);
+			}
+
+			// If sorting is done
+			if (sortingCompleted) {
+				sf::Text done(font, "Sorting Completed!", 12);
+				done.setFillColor(sf::Color::Green);
+				done.setPosition({ 10, 10 });
+				window.draw(done);
+
+				sf::Text reset(font, "Press R to reset.", 12);
+				reset.setFillColor(sf::Color::White);
+				reset.setPosition({ 10, done.getLocalBounds().size.y + 20});
+				window.draw(reset);
+				
 			}
 		}
 
