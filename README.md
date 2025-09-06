@@ -9,6 +9,9 @@ This project demonstrates the bubble sort algorithm with an interactive graphica
 - **Start, pause and reset** sorting using keyboard controls:
     - **SPACE**: Start/Pause sorting
     - **R**: Reset the array
+- **Adjustable sorting speed** with keyboard controls:
+    - **UP Arrow**: Increase speed (faster sorting)
+    - **DOWN Arrow**: Decrease speed (slower sorting)
 
 ## Requirements
 - C++17 or later
