@@ -12,7 +12,11 @@ int main() {
 	sf::RenderWindow window(sf::VideoMode({ w, h }), "Sorting Visualizer", sf::Style::Titlebar | sf::Style::Close);
 
 	// Load font
-	sf::Font font("font/PressStart2P-Regular.ttf");
+	sf::Font font;
+	if (!font.openFromFile("font/PressStart2P-Regular.ttf")) {
+		std::cerr << "Error: couldn't load font!" << std::endl;
+		return EXIT_FAILURE;
+	}
 
 	// Define title text
 	sf::Text titleText(font, "Bubble Sort Visualizer", 31);
@@ -54,6 +58,10 @@ int main() {
 	// Indices for bubble sort iteration
 	int i = 0, j = 0;
 
+	// Clcok
+	sf::Clock clock;
+	double stepDelay = 0.01;
+
 	// While window is open
 	while (window.isOpen()) {
 		// Handle events
@@ -80,6 +88,12 @@ int main() {
 					for (auto& v : values) {
 						v = std::rand() % (window.getSize().y - 50) + 10;
 					}
+				}
+
+				if (key->scancode == sf::Keyboard::Scan::Up) {
+					stepDelay = std::max(0.000001, stepDelay - 0.005);
+				} else if (key->scancode == sf::Keyboard::Scan::Down) {
+					stepDelay = std::min(2.0, stepDelay + 0.005);
 				}
 			}
 		}
@@ -118,25 +132,28 @@ int main() {
 			// If sorting is active, and not paused
 			if (sortingStarted && !isPaused && !sortingCompleted) {
 				// Show info text
-				sf::Text info(font, "Sorting...Press SPACE to pause");
+				sf::Text info(font, "Sorting...Press SPACE to pause.");
 				info.setPosition({ 10, 10 });
 				info.setCharacterSize(12);
 
 				window.draw(info);
 
-				// Bubble sort visualization state
-				if (i < n) {
-					if (j < n - i - 1) {
-						if (values[j] > values[j + 1]) {
-							std::swap(values[j], values[j + 1]);
+				if (clock.getElapsedTime().asSeconds() > stepDelay) {
+					// Bubble sort visualization state
+					if (i < n) {
+						if (j < n - i - 1) {
+							if (values[j] > values[j + 1]) {
+								std::swap(values[j], values[j + 1]);
+							}
+							j++;
+						} else {
+							j = 0;
+							i++;
 						}
-						j++;
 					} else {
-						j = 0;
-						i++;
+						sortingCompleted = true;
 					}
-				} else {
-					sortingCompleted = true;
+					clock.restart();
 				}
 			}
 			
@@ -178,5 +195,5 @@ int main() {
 		window.display();
 	}
 
-	return 0;
+	return EXIT_SUCCESS;
 }
