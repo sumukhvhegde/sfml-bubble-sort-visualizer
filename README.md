@@ -2,7 +2,7 @@
 
 A simple **Bubble Sort Visualizer** built with **SFML-3.0.0 in C++**.
 
-This project demonstrates the bubble sort algorithm with an interactive graphical interface.
+This project demonstrates the bubble sort algorithm.
 
 ## Features
 - Visualizes the **Bubble Sort** algorithm step by step.
