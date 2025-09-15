@@ -7,8 +7,8 @@
 
 int main() {
 	// Define window
-	const int w = 800;
-	const int h = 600;
+	const int w = 1200;
+	const int h = 800;
 	sf::RenderWindow window(sf::VideoMode({ w, h }), "Sorting Visualizer", sf::Style::Titlebar | sf::Style::Close);
 
 	// Load font
