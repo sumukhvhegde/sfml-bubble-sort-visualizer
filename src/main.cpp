@@ -118,7 +118,7 @@ int main() {
 				bar.setPosition({ static_cast<float>(k) * barWidth, static_cast<float>(window.getSize().y) - values[k] });
 
 				// Highlight bars being compared
-				if (k == j || k == j + 1) {
+				if (!sortingCompleted && (k == j || k == j + 1)) {
 					bar.setFillColor(sf::Color::Red);
 				} else {
 					// Map height to color 
