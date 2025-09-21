@@ -1,6 +1,6 @@
 # SFML Sorting Visualizer
 
-A simple **Bubble Sort Visualizer** built with **SFML-3.0.0 in C++**.
+A simple **Sorting Visualizer** built with **SFML-3.0.0 in C++**.
 
 This project demonstrates how **Bubble Sort** and **Selection Sort** algorithms work step by step.
 
