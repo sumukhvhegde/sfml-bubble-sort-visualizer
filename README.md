@@ -1,4 +1,4 @@
-# SFML Bubble Sort Visualizer
+# SFML Sorting Visualizer
 
 A simple **Bubble Sort Visualizer** built with **SFML-3.0.0 in C++**.
 
