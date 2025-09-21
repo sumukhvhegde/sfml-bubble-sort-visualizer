@@ -5,10 +5,17 @@
 #include <cstdlib>
 #include <ctime>
 
+// Sorting algorithms
+enum class Algorithm {
+	None,
+	Bubble,
+	Selection
+};
+
 int main() {
 	// Define window
-	const int w = 1200;
-	const int h = 800;
+	const int w = 1280;
+	const int h = 720;
 	sf::RenderWindow window(sf::VideoMode({ w, h }), "Sorting Visualizer", sf::Style::Titlebar | sf::Style::Close);
 
 	// Load font
@@ -19,7 +26,7 @@ int main() {
 	}
 
 	// Define title text
-	sf::Text titleText(font, "Bubble Sort Visualizer", 31);
+	sf::Text titleText(font, "Sorting Visualizer", 32);
 	titleText.setFillColor(sf::Color(0, 150, 255));
 
 	// Get title text bounds
@@ -27,7 +34,7 @@ int main() {
 
 	// Set title text origin to the center
 	titleText.setOrigin({ titleBounds.size.x / 2.f, titleBounds.size.y / 2.f });
-	titleText.setPosition({ window.getSize().x / 2.f, 100.f });
+	titleText.setPosition({ window.getSize().x / 2.f, 160.f });
 
 	// Define instruction text
 	sf::Text startText(font, "Press SPACE to start sorting.\n\nPress R to reset.", 15);
@@ -52,11 +59,17 @@ int main() {
 	// Seed random and fill values with random heights
 	std::srand(static_cast<unsigned>(std::time(nullptr)));
 	for (int i = 0; i < n; ++i) {
-		values[i] = std::rand() % (window.getSize().y - 50) + 10;
+		values[i] = std::rand() % (window.getSize().y - 100) + 10;
 	}
 
 	// Indices for bubble sort iteration
 	int i = 0, j = 0;
+
+	// Indices for selection sort iteration
+	int sel_i = 0, sel_j = 0, sel_minIndex = 0;
+
+	// Current algorithm
+	Algorithm currentAlgo = Algorithm::None;
 
 	// Clcok
 	sf::Clock clock;
@@ -74,6 +87,15 @@ int main() {
 						sortingStarted = true;
 						sortingCompleted = false;
 						isPaused = false;
+
+						if (currentAlgo == Algorithm::Bubble) {
+							i = 0;
+							j = 0;
+						} else if (currentAlgo == Algorithm::Selection) {
+							sel_i = 0;
+							sel_minIndex = 0;
+							sel_j = sel_i + 1;
+						}
 					} else {
 						isPaused = !isPaused;
 					}
@@ -81,12 +103,21 @@ int main() {
 
 				if (key->scancode == sf::Keyboard::Scan::R) {
 					sortingStarted = false;
+					sortingCompleted = false;
+					isPaused = false;
+					
+					// Reset bubble sort indices 
 					i = 0;
 					j = 0;
 
+					// Reset selection sort indices
+					sel_i = 0;
+					sel_minIndex = 0;
+					sel_j = 1;
+
 					// Shuffle array
 					for (auto& v : values) {
-						v = std::rand() % (window.getSize().y - 50) + 10;
+						v = std::rand() % (window.getSize().y - 100) + 10;
 					}
 				}
 
@@ -95,11 +126,46 @@ int main() {
 				} else if (key->scancode == sf::Keyboard::Scan::Down) {
 					stepDelay = std::min(2.0, stepDelay + 0.005);
 				}
+
+				if (key->scancode == sf::Keyboard::Scan::B) {
+					currentAlgo = Algorithm::Bubble;
+					sortingStarted = false;
+					sortingCompleted = false;
+					i = j = 0;
+				}
+
+				if (key->scancode == sf::Keyboard::Scan::S) {
+					currentAlgo = Algorithm::Selection;
+					sortingStarted = false;
+					sortingCompleted = false;
+					sel_i = sel_j = sel_minIndex = 0;
+				}
 			}
 		}
 
 		// Clear window
 		window.clear(sf::Color(10, 10, 10));
+
+		// Update title
+		if (currentAlgo == Algorithm::Bubble) {
+			titleText.setString("Bubble Sort Visualizer");
+			titleText.setFillColor(sf::Color(0, 150, 255));
+
+			sf::FloatRect titleBounds = titleText.getLocalBounds();
+		
+			titleText.setOrigin({ titleBounds.size.x / 2.f, titleBounds.size.y / 2.f });
+			titleText.setPosition({ window.getSize().x / 2.f, 160.f });
+		} else if (currentAlgo == Algorithm::Selection) {
+			titleText.setString("Selection Sort Visualizer");
+			titleText.setFillColor(sf::Color(0, 150, 255));
+
+			sf::FloatRect titleBounds = titleText.getLocalBounds();
+
+			titleText.setOrigin({ titleBounds.size.x / 2.f, titleBounds.size.y / 2.f });
+			titleText.setPosition({ window.getSize().x / 2.f, 160.f });
+		} else {
+			titleText.setString("Sorting Visualizer");
+		}
 
 		// Draw texts before sorting starts, else draw the bars
 		if (!sortingStarted) {
@@ -118,10 +184,16 @@ int main() {
 				bar.setPosition({ static_cast<float>(k) * barWidth, static_cast<float>(window.getSize().y) - values[k] });
 
 				// Highlight bars being compared
-				if (!sortingCompleted && (k == j || k == j + 1)) {
-					bar.setFillColor(sf::Color::Red);
+				if (!sortingCompleted) {
+					if (currentAlgo == Algorithm::Bubble && (k == j || k == j + 1)) {
+						bar.setFillColor(sf::Color::Red);
+					} else if (currentAlgo == Algorithm::Selection && (k == sel_j || k == sel_minIndex)) {
+						bar.setFillColor(sf::Color::Red);
+					} else {
+						int colorVal = static_cast<int>(255 * values[k] / window.getSize().y);
+						bar.setFillColor(sf::Color(colorVal, colorVal, 255));
+					}
 				} else {
-					// Map height to color 
 					int colorVal = static_cast<int>(255 * values[k] / window.getSize().y);
 					bar.setFillColor(sf::Color(colorVal, colorVal, 255));
 				}
@@ -129,8 +201,16 @@ int main() {
 				window.draw(bar);
 			}
 
+			if (currentAlgo == Algorithm::None) {
+				sf::Text info(font, "Choose a sorting algorithm to begin sorting.\n\nB: Bubble Sort\nS: Selection Sort");
+				info.setPosition({ 10, 10 });
+				info.setCharacterSize(12);
+
+				window.draw(info);
+			}
+
 			// If sorting is active, and not paused
-			if (sortingStarted && !isPaused && !sortingCompleted) {
+			if (sortingStarted && !isPaused && !sortingCompleted && currentAlgo != Algorithm::None) {
 				// Show info text
 				sf::Text info(font, "Sorting...Press SPACE to pause.");
 				info.setPosition({ 10, 10 });
@@ -139,19 +219,38 @@ int main() {
 				window.draw(info);
 
 				if (clock.getElapsedTime().asSeconds() > stepDelay) {
-					// Bubble sort visualization state
-					if (i < n) {
-						if (j < n - i - 1) {
-							if (values[j] > values[j + 1]) {
-								std::swap(values[j], values[j + 1]);
+					if (currentAlgo == Algorithm::Bubble) {
+						// Bubble sort visualization state
+						if (i < n) {
+							if (j < n - i - 1) {
+								if (values[j] > values[j + 1]) {
+									std::swap(values[j], values[j + 1]);
+								}
+								j++;
+							} else {
+								j = 0;
+								i++;
 							}
-							j++;
 						} else {
-							j = 0;
-							i++;
+							sortingCompleted = true;
 						}
-					} else {
-						sortingCompleted = true;
+					} else if (currentAlgo == Algorithm::Selection) {
+						// Selection sort visualization state
+						if (sel_i < n - 1) {
+							if (sel_j < n) {
+								if (values[sel_j] < values[sel_minIndex]) {
+									sel_minIndex = sel_j;
+								}
+								sel_j++;
+							} else {
+								std::swap(values[sel_i], values[sel_minIndex]);
+								sel_i++;
+								sel_minIndex = sel_i;
+								sel_j = sel_i + 1;
+							}
+						} else {
+							sortingCompleted = true;
+						}
 					}
 					clock.restart();
 				}
@@ -187,7 +286,6 @@ int main() {
 				reset.setFillColor(sf::Color::White);
 				reset.setPosition({ 10, done.getLocalBounds().size.y + 20});
 				window.draw(reset);
-				
 			}
 		}
 
