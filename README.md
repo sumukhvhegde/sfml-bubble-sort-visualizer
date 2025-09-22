@@ -6,8 +6,8 @@ This project demonstrates how **Bubble Sort** and **Selection Sort** algorithms 
 
 ## Features
 - Visualizes the following algorithms:
-    -**Bubble Sort** (compares adjacent elements, sorts right -> left per pass)
-    -**Selection Sort** (selects smallest element, sorts left -> right per pass)
+    - **Bubble Sort** (compares adjacent elements, sorts right -> left per pass)
+    - **Selection Sort** (selects smallest element, sorts left -> right per pass)
 - **Start, pause and reset** sorting using keyboard controls:
     - **SPACE**: Start/Pause sorting
     - **R**: Reset the array
